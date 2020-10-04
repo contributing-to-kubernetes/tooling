@@ -1,0 +1,54 @@
+version: '3'
+    
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - main
+
+  flask-k8s:
+    build:
+      context: ./flask-k8s
+      dockerfile: Dockerfile
+    volumes:
+      - ./flask-k8s:/code
+    ports:
+      - "4000:4000"
+    networks:
+      - main
+
+  rails-k8s:
+    build:
+      context: ./rails-k8s
+      dockerfile: Dockerfile
+    volumes:
+      - ./rails-k8s:/code
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    networks:
+      - main
+
+  gin-k8s:
+    build:
+      context: ./gin-k8s
+      dockerfile: Dockerfile
+    volumes:
+      - ./gin-k8s:/go/src/gin-k8s
+    ports:
+      - "5000:5000"
+    networks:
+      - main
+
+networks:
+  main:
